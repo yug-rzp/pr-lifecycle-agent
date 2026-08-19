@@ -21,3 +21,5 @@ python app.py
 ```
 
 Set `ALLOWED_REPOS`, `GITHUB_WEBHOOK_SECRET`, and `LLM_API_KEY` before connecting a webhook. Handler functions intentionally return plans until GitHub/Slack credentials and production-side effects are configured.
+
+For live writes set `ENABLE_WRITES=true`; otherwise handlers perform analysis and return proposed actions. Configure `OPENAI_API_KEY` (or leave it unset for a safe fallback), `SLACK_WEBHOOK_URL`, `MAX_DIFF_LINES`, and a comma-separated `ALLOWED_REPOS` list.
