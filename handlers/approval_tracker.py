@@ -1,4 +1,4 @@
-import os
+import os, fnmatch, base64
 from core.gh import json_run
 from core.guardrails import repo_allowed
 def parse_codeowners(text):
@@ -7,14 +7,26 @@ def parse_codeowners(text):
         parts=line.split('#',1)[0].split()
         if len(parts)>1: owners[parts[0]]=parts[1:]
     return owners
+def required_owners(codeowners, files):
+    matched=set()
+    for path in files:
+        best=[]
+        for pattern, owners in codeowners.items():
+            pattern=pattern.lstrip('/')
+            if fnmatch.fnmatch(path, pattern) or fnmatch.fnmatch('/'+path, '/'+pattern): best=owners
+        matched.update(best)
+    return matched
 def handle(payload):
     repo=payload.get('repository',{}).get('full_name',''); pr=payload.get('pull_request',{})
     if not repo_allowed(repo): return {'status':'blocked','reason':'repository is not allow-listed'}
     number=str(pr.get('number','')); reviews=json_run('pr','view',number,'--json','reviews',repo=repo).get('reviews',[])
     approved={r.get('author',{}).get('login') for r in reviews if r.get('state')=='APPROVED'}
-    missing=[]
+    missing=[]; files=[]
     try:
-        data=json_run('api','repos/%s/contents/CODEOWNERS'%repo,repo=repo); missing=sorted(set(sum(parse_codeowners(data.get('content','')).values(),[]))-approved)
+        data=json_run('api','repos/%s/contents/CODEOWNERS'%repo,repo=repo)
+        raw=base64.b64decode(data.get('content','')).decode() if data.get('encoding')=='base64' else data.get('content','')
+        files=[f.get('path','') for f in json_run('pr','view',number,'--json','files',repo=repo).get('files',[])]
+        missing=sorted(required_owners(parse_codeowners(raw),files)-approved)
     except Exception: pass
     webhook=os.getenv('SLACK_WEBHOOK_URL')
     if missing and webhook:
