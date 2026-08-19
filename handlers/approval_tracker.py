@@ -1,6 +1,7 @@
 import os, fnmatch, base64
 from core.gh import json_run
 from core.guardrails import repo_allowed
+from core.config import slack_webhook
 def parse_codeowners(text):
     owners={}
     for line in text.splitlines():
@@ -28,7 +29,7 @@ def handle(payload):
         files=[f.get('path','') for f in json_run('pr','view',number,'--json','files',repo=repo).get('files',[])]
         missing=sorted(required_owners(parse_codeowners(raw),files)-approved)
     except Exception: pass
-    webhook=os.getenv('SLACK_WEBHOOK_URL')
+    webhook=slack_webhook()
     if missing and webhook:
         import requests
         requests.post(webhook,json={'text':'PR %s needs approval from: %s'%(pr.get('html_url',number),', '.join(missing))},timeout=10).raise_for_status()

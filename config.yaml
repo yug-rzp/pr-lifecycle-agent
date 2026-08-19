@@ -1,3 +1,9 @@
 allowed_repos: []
 slack_webhook_url: ""
 coralogix_profiles: []
+protected_branches:
+  - sg_release
+  - us_release
+  - in_release
+  - "special/*"
+slack_team_map: {}

@@ -10,6 +10,8 @@ app = Flask(__name__)
 @app.post("/webhooks/github")
 def github_webhook():
     secret = os.getenv("GITHUB_WEBHOOK_SECRET")
+    if not secret:
+        return jsonify(error="GITHUB_WEBHOOK_SECRET is required"), 500
     if secret:
         expected = "sha256=" + hmac.new(secret.encode(), request.get_data(), hashlib.sha256).hexdigest()
         if not hmac.compare_digest(request.headers.get("X-Hub-Signature-256", ""), expected):
