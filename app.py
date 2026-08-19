@@ -3,6 +3,7 @@ import hmac, hashlib
 from flask import Flask, jsonify, request
 
 from core.orchestrator import dispatch
+from handlers.slack_interactivity import verify as verify_slack, handle as handle_slack
 
 app = Flask(__name__)
 
@@ -24,6 +25,12 @@ def github_webhook():
 @app.get("/health")
 def health():
     return jsonify(status="ok")
+
+@app.post('/webhooks/slack')
+def slack_webhook():
+    body=request.get_data(as_text=True)
+    if not verify_slack(request.headers, body): return jsonify(error='invalid Slack signature'), 401
+    return jsonify(handle_slack(request.form))
 
 
 if __name__ == "__main__":
