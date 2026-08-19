@@ -7,3 +7,24 @@ protected_branches:
   - in_release
   - "special/*"
 slack_team_map: {}
+security_review_repos:
+  - razorpay/mozart
+  - razorpay/integrations-go
+security_slack_channel: "#security-mozart-pr-review"
+security_reviewers:
+  - kashwathkumar
+  - suchith-r
+  - pr4th4m-r4z0r
+  - HDRZP
+  - mrunalchawda
+  - Deepam1998
+  - hxrikp1729
+  - MahlaqaHaque
+  - shahbazkasim
+  - raj-sec
+  - mozart-ai-pr-reviewer[bot]
+  - amajdali-rzp
+  - pratyushsureka-jpg
+  - preethib-rzp
+  - keertivS09
+  - anshikasriv17
